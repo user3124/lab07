@@ -62,6 +62,8 @@ namespace lab7
 
                     case 6:
                         Console.WriteLine("Обход дерева с сортировкой:");
+
+                        // Лямбда-выражение передается в метод при вызове
                         var sortedNodes = tree.GetSortedNodes((x, y) => x.CompareTo(y));
                         foreach (var item in sortedNodes)
                         {
