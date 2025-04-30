@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace lab7
 {
-    public class BinaryTree<T> where T : IComparable<T>
+    public class BinaryTree<T> : IEnumerable<T> where T : IComparable
     {
         private BinaryTreeNode<T> _root; // Корень дерева
         private BinaryTreeNode<T> _currentNode; // Текущий узел
@@ -16,6 +17,27 @@ namespace lab7
         {
             _root = null;
             _currentNode = null;
+        }
+
+        // Текущий узел
+        public BinaryTreeNode<T> Current()
+        {
+            return _currentNode;
+        }
+
+        // Сброс позиции
+        public void Reset()
+        {
+            _currentNode = GetLeftmostNode(_root);
+        }
+
+        private BinaryTreeNode<T> GetLeftmostNode(BinaryTreeNode<T> node)
+        {
+            while (node?.Left != null)
+            {
+                node = node.Left;
+            }
+            return node;
         }
 
         public BinaryTreeNode<T> Next(BinaryTreeNode<T> node)
@@ -116,6 +138,52 @@ namespace lab7
                 tree._currentNode = tree.Previous(tree._currentNode);
             }
             return tree;
+        }
+
+        // Реализуем перечислитель, чтобы можно было использовать дерево в цикле foreach
+        public IEnumerator<T> GetEnumerator()
+        {
+            return InOrderTraversal(_root).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        private IEnumerable<T> InOrderTraversal(BinaryTreeNode<T> node)
+        {
+            if (node != null)
+            {
+                foreach (var item in InOrderTraversal(node.Left))
+                {
+                    yield return item;
+                }
+                yield return node.Data;
+
+                foreach (var item in InOrderTraversal(node.Right))
+                {
+                    yield return item;
+                }
+            }
+        }
+
+        // Метод для внешнего итератора
+        public IEnumerable<T> GetSortedNodes(Func<T, T, int> comparison)
+        {
+            var sortedList = new List<T>();
+            InOrderTraversalWithLambda(_root, sortedList, comparison);
+            return sortedList;
+        }
+
+        private void InOrderTraversalWithLambda(BinaryTreeNode<T> node, List<T> list, Func<T, T, int> comparison)
+        {
+            if (node != null)
+            {
+                InOrderTraversalWithLambda(node.Left, list, comparison);
+                list.Add(node.Data);
+                InOrderTraversalWithLambda(node.Right, list, comparison);
+            }
         }
     }
 }
